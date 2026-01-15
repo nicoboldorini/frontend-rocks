@@ -1,27 +1,46 @@
+import { useEffect, useState } from "react";
+import { PokeAPI } from "./api";
 
-const cardStyle =
-  "bg-green-500 w-40 h-48 text-center flex flex-col items-center justify-center";
+type Pokemon = {
+  id: number;
+  image: string;
+  name: string;
+};
 
-const PokemonCard = ({ name, image }: { name: string; image: string }) => {
+export const Card: React.FC<Pokemon> = ({ image, name }) => {
   return (
-    <div className={cardStyle}>
-      <img src={image} alt={name} className="w-30 h-30 mb-2" />
-      <strong className="text-white">{name}</strong>
+    <div className="w-60 h-60 border-2 bg-gray-200 rounded-lg shadow-lg p-4 flex flex-col items-center justify-center">
+      <img src={image} alt={name} className="w-32 h-32 object-contain mb-2" />
+      <h2 className="text-lg font-bold">{name}</h2>
     </div>
   );
-}; 
+};
 
 export const Root = () => {
-  const pokemons = [
-    { name: "Pikachu", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" },
-    { name: "Bulbasaur", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" },
-    { name: "Charmander", image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" },
-  ];
+  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+
+  useEffect(() => {
+    PokeAPI.listPokemons()
+      .then(async (response) => {
+        const transformedPokemons = await Promise.all(
+          response.results.map(async (pokemon: any) => {
+            const detail = await PokeAPI.getPokemonByName(pokemon.name);
+            return {
+              id: detail.id,
+              image: detail.sprites?.other?.["official-artwork"]?.front_default || "",
+              name: detail.name,
+            };
+          })
+        );
+        setPokemons(transformedPokemons);
+      })
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   return (
-    <div className="space-x-2 flex flex-wrap justify-center">
-      {pokemons.map((Pokemon) => (
-        <PokemonCard key={Pokemon.name} name={Pokemon.name} image={Pokemon.image} />
+    <div className="pt-4 pl-4 flex flex-wrap gap-4">
+      {pokemons.map((pokemon) => (
+        <Card key={pokemon.id} image={pokemon.image} name={pokemon.name} />
       ))}
     </div>
   );
