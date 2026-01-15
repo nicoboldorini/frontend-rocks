@@ -10,7 +10,7 @@ const PokemonCard = ({ name, image }: { name: string; image: string }) => {
       <strong className="text-white">{name}</strong>
     </div>
   );
-};
+}; 
 
 export const Root = () => {
   const pokemons = [
