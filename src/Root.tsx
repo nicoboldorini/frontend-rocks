@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 
 const cardStyle =
   "bg-green-500 w-40 h-48 text-center flex flex-col items-center justify-center";
